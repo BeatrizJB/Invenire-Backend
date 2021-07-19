@@ -18,6 +18,7 @@ router.post("/signup", async (req, res) => {
     res.status(400).json({ message: "Password is too weak" });
     return;
   }
+  
   //check if username already exists
   const user = await User.findOne({ username });
   if (user !== null) {
