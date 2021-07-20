@@ -43,8 +43,11 @@ app.locals.title = `${capitalized(projectName)} created with IronLauncher`;
 const index = require("./routes/index");
 app.use("/", index);
 
-const inventory = require("./routes/inventory-routes");
-app.use("/api", inventory);
+// const inventory = require("./routes/inventory-routes");
+// app.use("/api", inventory);
+
+const list = require("./routes/list-routes");
+app.use("/api", list);
 
 const auth = require("./routes/auth-routes");
 app.use("/api", auth);

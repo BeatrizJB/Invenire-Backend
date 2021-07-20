@@ -6,7 +6,7 @@ const ItemSchema = new Schema(
     designation: String,
     type: String,
     category: String,
-    nOfItems: {
+    nOfParts: {
       type: Number,
       min: 1,
       max: 10000,
