@@ -15,11 +15,11 @@ router.get("/list", async (req, res) => {
   }
 });
 
-//Create a new list
+//Create a new item
 
 router.post("/list", async (req, res) => {
-  const { title, items } = req.body;
-  if (!title || !items) {
+  const { title, item } = req.body;
+  if (!title || !item) {
     res.status(400).json({ message: "missing fields" });
 
     return;
@@ -28,7 +28,7 @@ router.post("/list", async (req, res) => {
   try {
     const response = await List.create({
       title,
-      items,
+      item,
     });
     res.status(200).json(response);
   } catch (e) {
@@ -60,10 +60,10 @@ router.get("/list/:id", async (req, res) => {
 //Update list
 router.put("/list/:id", async (req, res) => {
   try {
-    const { title, items } = req.body;
+    const { title, item } = req.body;
     await List.findByIdAndUpdate(req.params.id, {
       title,
-      items,
+      item,
     });
     res.status(200).json(`id ${req.params.id} was updated`);
   } catch (e) {
