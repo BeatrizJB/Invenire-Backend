@@ -18,8 +18,8 @@ router.get("/list", async (req, res) => {
 //Create a new list
 
 router.post("/list", async (req, res) => {
-  const { category, items } = req.body;
-  if (!category || !items) {
+  const { title, item } = req.body;
+  if (!title || !item) {
     res.status(400).json({ message: "missing fields" });
 
     return;
@@ -27,8 +27,8 @@ router.post("/list", async (req, res) => {
 
   try {
     const response = await List.create({
-      category,
-      items,
+      title,
+      item,
     });
     res.status(200).json(response);
   } catch (e) {
@@ -41,7 +41,7 @@ router.post("/list", async (req, res) => {
 router.delete("/list/:id", async (req, res) => {
   try {
     await List.findByIdAndRemove(req.params.id);
-    res.status(200).json({message: `id ${req.params.id} was deleted`})
+    res.status(200).json({ message: `id ${req.params.id} was deleted` });
   } catch (e) {
     res.status(500).json({ message: `error ocurred ${e}` });
   }
@@ -49,23 +49,21 @@ router.delete("/list/:id", async (req, res) => {
 
 //Get list by ID
 router.get("/list/:id", async (req, res) => {
-    try {
-        const listSpecs = await List.findById(req.params.id);
-        res.status(200).json(listSpecs);
-    } catch (e) {
+  try {
+    const listSpecs = await List.findById(req.params.id);
+    res.status(200).json(listSpecs);
+  } catch (e) {
     res.status(500).json({ message: `error ocurred ${e}` });
   }
-})
-
-
+});
 
 //Update list
 router.put("/list/:id", async (req, res) => {
   try {
-    const { category, items } = req.body;
+    const { title, item } = req.body;
     await List.findByIdAndUpdate(req.params.id, {
-      category,
-      items,
+      title,
+      item,
     });
     res.status(200).json(`id ${req.params.id} was updated`);
   } catch (e) {
