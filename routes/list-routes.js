@@ -18,8 +18,9 @@ router.get("/list", async (req, res) => {
 //Create a new list
 
 router.post("/list", async (req, res) => {
-  const { title, items } = req.body;
-  if (!title || !items) {
+  const { title } = req.body;
+  
+  if (!title) {
     res.status(400).json({ message: "missing fields" });
 
     return;
@@ -28,11 +29,27 @@ router.post("/list", async (req, res) => {
   try {
     const response = await List.create({
       title,
-      items,
     });
     res.status(200).json(response);
   } catch (e) {
     res.status(500).json({ message: `error ocurred ${e}` });
+  }
+});
+
+//Update list
+router.put("/list/:id", async (req, res) => {
+  try {
+    const { designation } = req.body;
+    await List.findByIdAndUpdate(req.params.id, {
+      $push: {
+        listItems: {
+          designation
+        },
+      },
+    });
+    res.status(200).json(`id ${req.params.id} was updated`);
+  } catch (e) {
+    res.status(500).json({ message: `error occurred ${e}` });
   }
 });
 
@@ -57,18 +74,6 @@ router.get("/list/:id", async (req, res) => {
   }
 });
 
-//Update list
-router.put("/list/:id", async (req, res) => {
-  try {
-    const { title, items } = req.body;
-    await List.findByIdAndUpdate(req.params.id, {
-      title,
-      items,
-    });
-    res.status(200).json(`id ${req.params.id} was updated`);
-  } catch (e) {
-    res.status(500).json({ message: `error occurred ${e}` });
-  }
-});
+
 
 module.exports = router;
