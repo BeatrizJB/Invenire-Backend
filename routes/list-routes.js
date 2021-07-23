@@ -6,7 +6,7 @@ const List = require("../models/List.model");
 
 //Get all lists
 
-router.get("/list", async (req, res) => {
+router.get("/myinventories", async (req, res) => {
   try {
     const allLists = await List.find();
     res.status(200).json(allLists);
@@ -27,14 +27,29 @@ router.post("/list", async (req, res) => {
   }
 
   try {
-    const response = await List.create({
+    const newInv = await List.create({
       title,
     });
-    res.status(200).json(response);
+    res.status(200).json(newInv);
   } catch (e) {
     res.status(500).json({ message: `error ocurred ${e}` });
   }
 });
+
+
+//update the title of the list itself
+router.put("/list/edit/:id", async (req, res) => {
+  try {
+    const { title } = req.body;
+    await List.findByIdAndUpdate(req.params.id, {
+      title
+    });
+    res.status(200).json(`id ${req.params.id} was updated`);
+  } catch (e) {
+    res.status(500).json({ message: `error occurred ${e}` });
+  }
+});
+
 
 //create items of the list with list update
 router.put("/list/:id", async (req, res) => {
@@ -54,22 +69,10 @@ router.put("/list/:id", async (req, res) => {
 });
 
 
-//update the title of the list itself
-router.put("/list/:id/edit", async (req, res) => {
-  try {
-    const { title } = req.body;
-    await List.findByIdAndUpdate(req.params.id, {
-      title
-    });
-    res.status(200).json(`id ${req.params.id} was updated`);
-  } catch (e) {
-    res.status(500).json({ message: `error occurred ${e}` });
-  }
-});
 
 //update the items details
 
-router.put("/list/item/:id", async (req, res) => {
+router.post("/list/edit/item/:Itemid", async (req, res) => {
   try {
     const { designation, category, quantity, description, location, imageUrl } =
       req.body;
@@ -93,7 +96,7 @@ router.put("/list/item/:id", async (req, res) => {
 
    //Delete list
 
-   router.delete("/list/:id", async (req, res) => {
+   router.delete("/list/delete/:id", async (req, res) => {
      try {
        await List.findByIdAndRemove(req.params.id);
        res.status(200).json({ message: `id ${req.params.id} was deleted` });
@@ -101,6 +104,15 @@ router.put("/list/item/:id", async (req, res) => {
        res.status(500).json({ message: `error ocurred ${e}` });
      }
    });
+
+      router.delete("/list/delete/item/:id", async (req, res) => {
+        try {
+          await List.findByIdAndRemove(req.params.id)
+          res.status(200).json({ message: `id ${req.params.id} was deleted` });
+        } catch (e) {
+          res.status(500).json({ message: `error ocurred ${e}` });
+        }
+      });
 
 //Get list by ID
 router.get("/list/:id", async (req, res) => {
