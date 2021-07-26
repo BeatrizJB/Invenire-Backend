@@ -35,12 +35,14 @@ module.exports = (app) => {
   app.use(express.static(path.join(__dirname, "..", "public")));
 
   // Handles access to the favicon
-  app.use(favicon(path.join(__dirname, "..", "public", "images", "favicon.ico")));
+  app.use(
+    favicon(path.join(__dirname, "..", "public", "images", "favicon.ico"))
+  );
 
-    app.use(
-      cors({
-        credential: true,
-        origin: [process.env.CLIENT_HOSTNAME],
-      })
-    );
+  app.use(
+    cors({
+      credentials: true,
+      origin: [process.env.CLIENT_HOSTNAME],
+    })
+  );
 };
