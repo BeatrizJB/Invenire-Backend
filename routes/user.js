@@ -15,25 +15,5 @@ router.get("/myinventories", async (req, res) => {
   }
 });
 
-// router.get(
-//   "/myinventories/:invId",
-//   /*middleware,*/ async (req, res) => {
-//     try {
-//       const listSpecs = await List.findById(req.params.invId);
-//       res.status(200).json(listSpecs);
-//     } catch (e) {
-//       res.status(500).json({ message: `error ocurred ${e}` });
-//     }
-//   }
-// );
-
-// router.get("/myinventories/:invId/itemspecs/:itemId", async (req, res) => {
-//   try {
-//     const listSpecs = await List.findById(req.params.invId);
-//     res.status(200).json(listSpecs);
-//   } catch (e) {
-//     res.status(500).json({ message: `error ocurred ${e}` });
-//   }
-// });
 
 module.exports = router;
