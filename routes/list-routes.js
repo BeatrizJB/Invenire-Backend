@@ -1,214 +1,110 @@
-const { compare } = require("bcryptjs");
 const express = require("express");
 const router = express.Router();
 const List = require("../models/List.model");
+const fileUpload = require("../config/cloudinary");
 
-//routes to retrieve info from the api
+//MIDDLEWARE BEGIN  -----------------------------------------------------------------------------------------------------------------
 
-//ALL GETS -----------------------------------------------------------------------------------------------------------------
-
-//Get all inventories
-
-router.get("/myinventories", async (req, res) => {
-  try {
-    const allLists = await List.find();
-    res.status(200).json(allLists);
-  } catch (e) {
-    res.status(500).json({ message: `error ocurred ${e}` });
+function requireLogin(req, res, next) {
+  if (req.session.currentUser) {
+    next();
+  } else {
+    res.status(500).json({ message: `Please login.` });
   }
-});
+}
 
-//Get list by ID
-router.get("/myinventories/:invId", async (req, res) => {
-  try {
-    const listSpecs = await List.findById(req.params.invId);
-    res.status(200).json(listSpecs);
-  } catch (e) {
-    res.status(500).json({ message: `error ocurred ${e}` });
-  }
-});
+//MIDDLEWARE ENDS -----------------------------------------------------------------------------------------------------------------
 
-// router.get("/myinventories/:invId/itemspecs/:itemId", async (req, res) => {
-//   try {
-//     const listSpecs = await List.findById(req.params.invId);
-//     res.status(200).json(listSpecs);
-//   } catch (e) {
-//     res.status(500).json({ message: `error ocurred ${e}` });
-//   }
-// });
+//POST -----------------------------------------------------------------------------------------------------------------
 
-
-//END GETS -----------------------------------------------------------------------------------------------------------------
-
-//ALL POSTS -----------------------------------------------------------------------------------------------------------------
 //Create a new inventory
+router.post(
+  "/newinventory",
+  /*middleware,*/ async (req, res) => {
+    const { title } = req.body;
 
-router.post("/newinventory", async (req, res) => {
-  const { title } = req.body;
+    if (!title) {
+      res.status(400).json({ message: "missing fields" });
 
-  if (!title) {
-    res.status(400).json({ message: "missing fields" });
+      return;
+    }
 
-    return;
+    try {
+      const newInv = await List.create({
+        title,
+        /* user: req.session.currentUser */
+      });
+      res.status(200).json(newInv);
+    } catch (e) {
+      res.status(500).json({ message: `error ocurred ${e}` });
+    }
   }
+);
 
+//Upload image on cloudinary
+router.post("/upload", fileUpload.single("image"), (req, res) => {
   try {
-    const newInv = await List.create({
-      title,
-    });
-    res.status(200).json(newInv);
+    res.status(200).json({ fileUrl: req.file.path });
   } catch (e) {
-    res.status(500).json({ message: `error ocurred ${e}` });
+    res.status(500).json({ message: `error occurred ${e}` });
   }
 });
 
-//END POSTS -----------------------------------------------------------------------------------------------------------------
+//END POST -----------------------------------------------------------------------------------------------------------------
 
-//ALL PUTS -----------------------------------------------------------------------------------------------------------------
+//PUT -----------------------------------------------------------------------------------------------------------------
 
 //update the title of the list
-router.put("/myinventories/:invId", async (req, res) => {
-  try {
-    const { title } = req.body;
-    await List.findByIdAndUpdate(req.params.invId, {
-      title,
-    });
-    res.status(200).json(`id ${req.params.invId} was updated`);
-  } catch (e) {
-    res.status(500).json({ message: `error occurred ${e}` });
+router.put(
+  "/myinventories/:invId",
+  /*middleware,*/ async (req, res) => {
+    try {
+      const { title } = req.body;
+      await List.findByIdAndUpdate(req.params.invId, {
+        title,
+      });
+      res.status(200).json(`id ${req.params.invId} was updated`);
+    } catch (e) {
+      res.status(500).json({ message: `error occurred ${e}` });
+    }
   }
-});
+);
 
 //create (1by1) items of the inventory (with update)
-router.put("/myinventories/additems/:invId", async (req, res) => {
-  try {
-    const { designation } = req.body;
-    await List.findByIdAndUpdate(req.params.invId, {
-      $push: {
-        listItems: {
-          designation,
-        },
-      },
-    });
-    res.status(200).json(`id ${req.params.invId} was updated`);
-  } catch (e) {
-    res.status(500).json({ message: `error occurred ${e}` });
-  }
-});
-
-//update the item designation
-router.put("/myinventories/:invId/edititem/:itemId", async (req, res) => {
-  try {
-    const { designation } =
-      req.body;
-
-    const list = await List.findById(req.params.invId);
-    const listItems = list.listItems;
-    const itemToUpdate = listItems.find(
-      (item) => item._id == req.params.itemId
-    );
-
-    itemToUpdate.designation = designation;
-
-    await List.findByIdAndUpdate(req.params.invId, {
-      listItems: listItems,
-    });
-
-    res.status(200).json(list);
-    return;
-  } catch (e) {
-    res.status(500).json({ message: `error occurred ${e}` });
-  }
-});
-
-
-//update the items specs
-router.put("/myinventories/:invId/additemspecs/:itemId", async (req, res) => {
-  try {
-    const { category, quantity, description, location, imageUrl } =
-      req.body;
-
-    const list = await List.findById(req.params.invId);
-    const listItems = list.listItems;
-    const itemToUpdate = listItems.find(
-      (item) => item._id == req.params.itemId
-    );
-
-    itemToUpdate.category = category;
-    itemToUpdate.quantity = quantity;
-    itemToUpdate.description = description;
-    itemToUpdate.location = location;
-    itemToUpdate.imageUrl = imageUrl;
-
-    await List.findByIdAndUpdate(req.params.invId, {
-      listItems: listItems,
-    });
-
-    res.status(200).json(list);
-    return;
-  } catch (e) {
-    res.status(500).json({ message: `error occurred ${e}` });
-  }
-});
-
-
-//END PUTS  -----------------------------------------------------------------------------------------------------------------
-
-//ALL DELETE/REMOVE----------------------------------------------------------------------------------------------------------
-
-//Delete an inventory
-
-router.delete("/myinventories/deleteinventory/:invId", async (req, res) => {
-  try {
-    await List.findByIdAndRemove(req.params.invId);
-    res.status(200).json({ message: `id ${req.params.invId} was deleted` });
-  } catch (e) {
-    res.status(500).json({ message: `error ocurred ${e}` });
-  }
-});
-
-//delete an item from inventory
-
-  router.put("/myinventories/removeitem/:invId", async (req, res) => {
+router.put(
+  "/myinventories/additems/:invId",
+  /*middleware,*/ async (req, res) => {
     try {
       const { designation } = req.body;
       await List.findByIdAndUpdate(req.params.invId, {
-        $pull: {
+        $push: {
           listItems: {
             designation,
           },
         },
       });
-      res.status(200).json(`id ${req.params.invId} was deleted`);
+      res.status(200).json(`id ${req.params.invId} was updated`);
     } catch (e) {
       res.status(500).json({ message: `error occurred ${e}` });
     }
-  });
+  }
+);
 
-//delete 
-  router.put("/myinventories/:invId/removeitemspecs/:itemId", async (req, res) => {
+//update the item designation
+router.put(
+  "/myinventories/:invId/edititem/:itemId",
+  /*middleware,*/
+  async (req, res) => {
     try {
-      const {
-        
-        category,
-        quantity,
-        description,
-        location,
-        imageUrl,
-      } = req.body;
+      const { designation } = req.body;
 
       const list = await List.findById(req.params.invId);
       const listItems = list.listItems;
-      const itemToDelete = listItems.find(
+      const itemToUpdate = listItems.find(
         (item) => item._id == req.params.itemId
       );
 
-      
-      itemToDelete.category = category;
-      itemToDelete.quantity = quantity;
-      itemToDelete.description = description;
-      itemToDelete.location = location;
-      itemToDelete.imageUrl = imageUrl;
+      itemToUpdate.designation = designation;
 
       await List.findByIdAndUpdate(req.params.invId, {
         listItems: listItems,
@@ -219,7 +115,115 @@ router.delete("/myinventories/deleteinventory/:invId", async (req, res) => {
     } catch (e) {
       res.status(500).json({ message: `error occurred ${e}` });
     }
-  });
+  }
+);
+
+
+//create + update the items specs
+router.put(
+  "/myinventories/:invId/additemspecs/:itemId",
+  /*middleware,*/
+  async (req, res) => {
+    try {
+      const { category, quantity, description, location, imageUrl } = req.body;
+
+      const list = await List.findById(req.params.invId);
+      const listItems = list.listItems;
+      const itemToUpdate = listItems.find(
+        (item) => item._id == req.params.itemId
+      );
+
+      itemToUpdate.category = category;
+      itemToUpdate.quantity = quantity;
+      itemToUpdate.description = description;
+      itemToUpdate.location = location;
+      itemToUpdate.imageUrl = imageUrl;
+      //cloudinary here??
+
+      await List.findByIdAndUpdate(req.params.invId, {
+        listItems: listItems,
+      });
+
+      res.status(200).json(list);
+      return;
+    } catch (e) {
+      res.status(500).json({ message: `error occurred ${e}` });
+    }
+  }
+);
+
+
+//END PUT  -----------------------------------------------------------------------------------------------------------------
+
+// DELETE/REMOVE----------------------------------------------------------------------------------------------------------
+
+//Delete an inventory
+
+router.delete(
+  "/myinventories/deleteinventory/:invId",
+  /*middleware,*/
+  async (req, res) => {
+    try {
+      await List.findByIdAndRemove(req.params.invId);
+      res.status(200).json({ message: `id ${req.params.invId} was deleted` });
+    } catch (e) {
+      res.status(500).json({ message: `error ocurred ${e}` });
+    }
+  }
+);
+
+//delete an item from inventory
+
+  router.put(
+    "/myinventories/removeitem/:invId",
+    /*middleware,*/
+    async (req, res) => {
+      try {
+        const { designation } = req.body;
+        await List.findByIdAndUpdate(req.params.invId, {
+          $pull: {
+            listItems: {
+              designation,
+            },
+          },
+        });
+        res.status(200).json(`id ${req.params.invId} was deleted`);
+      } catch (e) {
+        res.status(500).json({ message: `error occurred ${e}` });
+      }
+    }
+  );
+
+
+//delete items specs not working
+  router.put(
+    "/myinventories/:invId/removeitemspecs/:itemId",
+    /*middleware,*/
+    async (req, res) => { 
+      try {
+        const list = await List.findById(req.params.invId);
+        const listItems = list.listItems;
+        console.log(listItems)
+
+        const filteredArr = listItems.filter(
+          (item) => item._id != req.params.itemId
+        );
+        console.log(filteredArr);
+
+        await List.findByIdAndUpdate(req.params.invId, {
+          listItems: filteredArr,
+        });
+
+        console.log(listItems);
+
+        res.status(200).json(list);
+        return;
+      } catch (e) {
+        res.status(500).json({ message: `error occurred ${e}` });
+      }
+    }
+  );
 
 
 module.exports = router;
+

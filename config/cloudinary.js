@@ -14,7 +14,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: "projects",
+    folder: "invenire",
     allowed_formats: ["png", "jpg"],
   },
   filename: function (req, file, cb) {
