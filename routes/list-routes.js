@@ -28,7 +28,7 @@ router.get("/myinventories/:invId", async (req, res) => {
   }
 });
 
-// router.get("/myinventories/:invId/specs/:itemId", async (req, res) => {
+// router.get("/myinventories/:invId/itemspecs/:itemId", async (req, res) => {
 //   try {
 //     const listSpecs = await List.findById(req.params.invId);
 //     res.status(200).json(listSpecs);
@@ -80,7 +80,7 @@ router.put("/myinventories/:invId", async (req, res) => {
 });
 
 //create (1by1) items of the inventory (with update)
-router.put("/myinventories/addItems/:invId", async (req, res) => {
+router.put("/myinventories/additems/:invId", async (req, res) => {
   try {
     const { designation } = req.body;
     await List.findByIdAndUpdate(req.params.invId, {
@@ -96,10 +96,10 @@ router.put("/myinventories/addItems/:invId", async (req, res) => {
   }
 });
 
-//update the items details
-router.put("/myinventories/:invId/addSpecs/:itemId", async (req, res) => {
+//update the item designation
+router.put("/myinventories/:invId/edititem/:itemId", async (req, res) => {
   try {
-    const { designation, category, quantity, description, location, imageUrl } =
+    const { designation } =
       req.body;
 
     const list = await List.findById(req.params.invId);
@@ -109,12 +109,6 @@ router.put("/myinventories/:invId/addSpecs/:itemId", async (req, res) => {
     );
 
     itemToUpdate.designation = designation;
-    itemToUpdate.category = category;
-    itemToUpdate.quantity = quantity;
-    itemToUpdate.description = description;
-    itemToUpdate.location = location;
-    itemToUpdate.imageUrl = imageUrl;
-
 
     await List.findByIdAndUpdate(req.params.invId, {
       listItems: listItems,
@@ -126,6 +120,37 @@ router.put("/myinventories/:invId/addSpecs/:itemId", async (req, res) => {
     res.status(500).json({ message: `error occurred ${e}` });
   }
 });
+
+
+//update the items specs
+router.put("/myinventories/:invId/additemspecs/:itemId", async (req, res) => {
+  try {
+    const { category, quantity, description, location, imageUrl } =
+      req.body;
+
+    const list = await List.findById(req.params.invId);
+    const listItems = list.listItems;
+    const itemToUpdate = listItems.find(
+      (item) => item._id == req.params.itemId
+    );
+
+    itemToUpdate.category = category;
+    itemToUpdate.quantity = quantity;
+    itemToUpdate.description = description;
+    itemToUpdate.location = location;
+    itemToUpdate.imageUrl = imageUrl;
+
+    await List.findByIdAndUpdate(req.params.invId, {
+      listItems: listItems,
+    });
+
+    res.status(200).json(list);
+    return;
+  } catch (e) {
+    res.status(500).json({ message: `error occurred ${e}` });
+  }
+});
+
 
 //END PUTS  -----------------------------------------------------------------------------------------------------------------
 
@@ -144,17 +169,57 @@ router.delete("/myinventories/deleteinventory/:invId", async (req, res) => {
 
 //delete an item from inventory
 
-  // try {
-  //   const { designation, category, quantity, description, location, imageUrl } =
-  //     req.body;
+  router.put("/myinventories/removeitem/:invId", async (req, res) => {
+    try {
+      const { designation } = req.body;
+      await List.findByIdAndUpdate(req.params.invId, {
+        $pull: {
+          listItems: {
+            designation,
+          },
+        },
+      });
+      res.status(200).json(`id ${req.params.invId} was deleted`);
+    } catch (e) {
+      res.status(500).json({ message: `error occurred ${e}` });
+    }
+  });
 
-  //   const list = await List.findById(req.params.invId);
-  //   const listItems = list.listItems;
-  //   const itemToUpdate = listItems.find(
-  //     (item) => item._id == req.params.itemId
-  //   );
+//delete 
+  router.put("/myinventories/:invId/removeitemspecs/:itemId", async (req, res) => {
+    try {
+      const {
+        
+        category,
+        quantity,
+        description,
+        location,
+        imageUrl,
+      } = req.body;
 
-  //   itemToUpdate.designation = designation;
+      const list = await List.findById(req.params.invId);
+      const listItems = list.listItems;
+      const itemToDelete = listItems.find(
+        (item) => item._id == req.params.itemId
+      );
+
+      
+      itemToDelete.category = category;
+      itemToDelete.quantity = quantity;
+      itemToDelete.description = description;
+      itemToDelete.location = location;
+      itemToDelete.imageUrl = imageUrl;
+
+      await List.findByIdAndUpdate(req.params.invId, {
+        listItems: listItems,
+      });
+
+      res.status(200).json(list);
+      return;
+    } catch (e) {
+      res.status(500).json({ message: `error occurred ${e}` });
+    }
+  });
 
 
 module.exports = router;
