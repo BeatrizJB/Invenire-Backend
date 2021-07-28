@@ -40,7 +40,6 @@ function requireLogin(req, res, next) {
 
 //GET ENDS -----------------------------------------------------------------------------------------------------------------
 
-
 //POST ----------------------------------------------------------------------------------------------------------------------------
 
 //Create a new inventory
@@ -58,7 +57,7 @@ router.post(
     try {
       const newInv = await List.create({
         title,
-        /* user: req.session.currentUser */
+        user: req.session.currentUser,
       });
       res.status(200).json(newInv);
     } catch (e) {
@@ -82,7 +81,7 @@ router.post("/upload", fileUpload.single("image"), (req, res) => {
 
 //update the title of the list
 router.put(
-  "/myinventories/:invId",
+  "/myinventories/editinv/:invId",
   /*middleware,*/ async (req, res) => {
     try {
       const { title } = req.body;
@@ -144,7 +143,6 @@ router.put(
   }
 );
 
-
 //create + update the items specs
 router.put(
   "/myinventories/:invId/additemspecs/:itemId",
@@ -178,6 +176,51 @@ router.put(
   }
 );
 
+//delete an item from inventory
+
+router.put(
+  "/myinventories/removeitem/:invId",
+  /*middleware,*/
+  async (req, res) => {
+    try {
+      const { designation } = req.body;
+      await List.findByIdAndUpdate(req.params.invId, {
+        $pull: {
+          listItems: {
+            designation,
+          },
+        },
+      });
+      res.status(200).json(`id ${req.params.invId} was deleted`);
+    } catch (e) {
+      res.status(500).json({ message: `error occurred ${e}` });
+    }
+  }
+);
+
+//delete items specs not working
+router.put(
+  "/myinventories/:invId/removeitemspecs/:itemId",
+  /*middleware,*/
+  async (req, res) => {
+    try {
+      const list = await List.findById(req.params.invId);
+      const listItems = list.listItems;
+
+      const filteredArr = listItems.filter(
+        (item) => item._id != req.params.itemId
+      );
+      await List.findByIdAndUpdate(req.params.invId, {
+        listItems: filteredArr,
+      });
+
+      res.status(200).json(list);
+      return;
+    } catch (e) {
+      res.status(500).json({ message: `error occurred ${e}` });
+    }
+  }
+);
 
 //END PUT  ---------------------------------------------------------------------------------------------------------------
 
@@ -198,58 +241,4 @@ router.delete(
   }
 );
 
-//delete an item from inventory
-
-  router.put(
-    "/myinventories/removeitem/:invId",
-    /*middleware,*/
-    async (req, res) => {
-      try {
-        const { designation } = req.body;
-        await List.findByIdAndUpdate(req.params.invId, {
-          $pull: {
-            listItems: {
-              designation,
-            },
-          },
-        });
-        res.status(200).json(`id ${req.params.invId} was deleted`);
-      } catch (e) {
-        res.status(500).json({ message: `error occurred ${e}` });
-      }
-    }
-  );
-
-
-//delete items specs not working
-  router.put(
-    "/myinventories/:invId/removeitemspecs/:itemId",
-    /*middleware,*/
-    async (req, res) => { 
-      try {
-        const list = await List.findById(req.params.invId);
-        const listItems = list.listItems;
-        console.log(listItems)
-
-        const filteredArr = listItems.filter(
-          (item) => item._id != req.params.itemId
-        );
-        console.log(filteredArr);
-
-        await List.findByIdAndUpdate(req.params.invId, {
-          listItems: filteredArr,
-        });
-
-        console.log(listItems);
-
-        res.status(200).json(list);
-        return;
-      } catch (e) {
-        res.status(500).json({ message: `error occurred ${e}` });
-      }
-    }
-  );
-
-
 module.exports = router;
-
