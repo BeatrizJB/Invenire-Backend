@@ -170,29 +170,29 @@ router.put(
 
 //delete an item from inventory
 
+// router.put(
+//   "/myinventories/removeitem/:invId",
+//   /*middleware,*/
+//   async (req, res) => {
+//     try {
+//       const { designation } = req.body;
+//       await List.findByIdAndUpdate(req.params.invId, {
+//         $pull: {
+//           listItems: {
+//             designation,
+//           },
+//         },
+//       });
+//       res.status(200).json(`id ${req.params.invId} was deleted`);
+//     } catch (e) {
+//       res.status(500).json({ message: `error occurred ${e}` });
+//     }
+//   }
+// );
+
+//delete item
 router.put(
   "/myinventories/removeitem/:invId",
-  /*middleware,*/
-  async (req, res) => {
-    try {
-      const { designation } = req.body;
-      await List.findByIdAndUpdate(req.params.invId, {
-        $pull: {
-          listItems: {
-            designation,
-          },
-        },
-      });
-      res.status(200).json(`id ${req.params.invId} was deleted`);
-    } catch (e) {
-      res.status(500).json({ message: `error occurred ${e}` });
-    }
-  }
-);
-
-//delete items specs not working
-router.put(
-  "/myinventories/:invId/removeitemspecs/:itemId",
   /*middleware,*/
   async (req, res) => {
     try {
