@@ -192,7 +192,7 @@ router.put(
 
 //delete item
 router.put(
-  "/myinventories/removeitem/:invId",
+  "/myinventories/:invId/removeitem/:itemId",
   /*middleware,*/
   async (req, res) => {
     try {
