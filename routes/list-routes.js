@@ -154,7 +154,7 @@ router.put(
       itemToUpdate.description = description;
       itemToUpdate.location = location;
       itemToUpdate.imageUrl = imageUrl;
-      //cloudinary here??
+    
 
       await List.findByIdAndUpdate(req.params.invId, {
         listItems: listItems,
