@@ -30,15 +30,6 @@ router.get(
   }
 );
 
-// router.get("/myinventories/:invId/itemspecs/:itemId", async (req, res) => {
-//   try {
-//     const listSpecs = await List.findById(req.params.invId);
-//     res.status(200).json(listSpecs);
-//   } catch (e) {
-//     res.status(500).json({ message: `error ocurred ${e}` });
-//   }
-// });
-
 //GET ENDS -----------------------------------------------------------------------------------------------------------------
 
 //POST ----------------------------------------------------------------------------------------------------------------------------

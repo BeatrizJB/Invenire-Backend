@@ -19,15 +19,17 @@ const app = express();
 require("./config")(app);
 
 const session = require("express-session");
+app.set("trust proxy", 1);
 app.use(
   session({
     resave: true,
     saveUninitialized: true,
     secret: process.env.SESSION_SECRET,
     cookie: {
-      sameSite: true, //frontend backend both run on localhost
-      httpOnly: true, //we are not using https
+      sameSite: /*true, frontend backend both run on localhost */ "none",
+      httpOnly: /*true, //we are not using https */ false,
       maxAge: 60000, //session time
+      secure: true,
     },
     rolling: true,
   })
@@ -35,7 +37,8 @@ app.use(
 
 // default value for title local
 const projectName = "invenire-backend";
-const capitalized = (string) => string[0].toUpperCase() + string.slice(1).toLowerCase();
+const capitalized = (string) =>
+  string[0].toUpperCase() + string.slice(1).toLowerCase();
 
 app.locals.title = `${capitalized(projectName)} created with IronLauncher`;
 
