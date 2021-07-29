@@ -137,7 +137,7 @@ router.put(
 
 //create + update the items specs
 router.put(
-  "/myinventories/:invId/additemspecs/:itemId",
+  "/myinventories/:invId/itemspecs/:itemId",
   /*middleware,*/
   async (req, res) => {
     try {
