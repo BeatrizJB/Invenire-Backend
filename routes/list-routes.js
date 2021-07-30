@@ -20,7 +20,7 @@ function requireLogin(req, res, next) {
 //get inventory
 router.get(
   "/myinventories/:invId",
-  requireLogin, async (req, res) => {
+  /*requireLogin,*/ async (req, res) => {
     try {
       const listSpecs = await List.findById(req.params.invId);
       res.status(200).json(listSpecs);
@@ -37,7 +37,7 @@ router.get(
 //Create a new inventory
 router.post(
   "/newinventory",
-  requireLogin, async (req, res) => {
+  /*requireLogin,*/ async (req, res) => {
     const { title } = req.body;
 
     if (!title) {
@@ -74,7 +74,7 @@ router.post("/upload", fileUpload.single("image"), (req, res) => {
 //update the title of the list
 router.put(
   "/myinventories/editinv/:invId",
-  requireLogin, async (req, res) => {
+  /*requireLogin,*/ async (req, res) => {
     try {
       const { title } = req.body;
       await List.findByIdAndUpdate(req.params.invId, {
@@ -90,7 +90,7 @@ router.put(
 //create (1by1) items of the inventory (with update)
 router.put(
   "/myinventories/additems/:invId",
-  requireLogin, async (req, res) => {
+  /*requireLogin,*/ async (req, res) => {
     try {
       const { designation } = req.body;
       await List.findByIdAndUpdate(req.params.invId, {
@@ -110,7 +110,7 @@ router.put(
 //update the item designation
 router.put(
   "/myinventories/:invId/edititem/:itemId",
-  requireLogin,
+  /*requireLogin,*/
   async (req, res) => {
     try {
       const { designation } = req.body;
@@ -138,7 +138,7 @@ router.put(
 //create + update the items specs
 router.put(
   "/myinventories/:invId/itemspecs/:itemId",
-  requireLogin,
+  /*requireLogin,*/
   async (req, res) => {
     try {
       const { category, quantity, description, location, imageUrl } = req.body;
@@ -192,7 +192,7 @@ router.put(
 //delete item
 router.put(
   "/myinventories/:invId/removeitem/:itemId",
-  requireLogin,
+  /*requireLogin,*/
   async (req, res) => {
     try {
       const list = await List.findById(req.params.invId);
@@ -221,7 +221,7 @@ router.put(
 
 router.delete(
   "/myinventories/deleteinventory/:invId",
-  requireLogin,
+  /*requireLogin,*/
   async (req, res) => {
     try {
       await List.findByIdAndRemove(req.params.invId);
